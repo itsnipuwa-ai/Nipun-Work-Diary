@@ -3,7 +3,7 @@ name: Build APK
 on:
   push:
     branches:
-      - main  # Change if you want another branch
+      - main  # Change this if you want another branch
 
 jobs:
   build:
@@ -11,43 +11,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Get your code
+      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Set up Node.js
+      # Step 2: Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'  # Match your local Node version
 
-      # Step 3: Configure npm to avoid permission issues
-      - name: Configure npm
-        run: npm config set unsafe-perm true
-
-      # Step 4: Install dependencies safely
+      # Step 3: Install dependencies (fix native binding issues)
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
-      # Step 5: Build the web app
+      # Step 4: Build web app
       - name: Build project
         run: npm run build
 
-      # Step 6: Install Capacitor CLI (if using Capacitor)
+      # Step 5: Install Capacitor CLI (if using Capacitor)
       - name: Install Capacitor CLI
         run: npm install -g @capacitor/cli
 
-      # Step 7: Copy web assets into Android project
+      # Step 6: Copy web assets into Android project
       - name: Copy web assets to Android
         run: npx cap copy android
 
-      # Step 8: Build the Android APK (debug)
+      # Step 7: Build Android APK (debug)
       - name: Build Android APK
         run: |
           cd android
           ./gradlew assembleDebug
 
-      # Step 9: Upload APK as artifact
+      # Step 8: Upload APK artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
