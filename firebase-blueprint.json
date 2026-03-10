@@ -1,0 +1,32 @@
+{
+  "entities": {
+    "Job": {
+      "title": "Job",
+      "description": "A record of an AC installation or service job.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "customerName": { "type": "string", "description": "Name of the customer" },
+        "address": { "type": "string", "description": "Service location address" },
+        "phone": { "type": "string", "description": "Customer contact number" },
+        "acModel": { "type": "string", "description": "Model of the AC unit" },
+        "jobType": { 
+          "type": "string", 
+          "enum": ["Installation", "Service", "Repair", "Maintenance"],
+          "description": "Type of work performed" 
+        },
+        "date": { "type": "string", "format": "date", "description": "Date of the job" },
+        "notes": { "type": "string", "description": "Additional details about the work" },
+        "engineerId": { "type": "string", "description": "UID of the engineer who did the job" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["customerName", "address", "jobType", "date", "engineerId"]
+    }
+  },
+  "firestore": {
+    "/jobs/{jobId}": {
+      "schema": "Job",
+      "description": "Collection of work logs"
+    }
+  }
+}

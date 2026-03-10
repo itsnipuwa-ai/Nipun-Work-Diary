@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: jobs
+    // Document ID: auto-generated
+    // Fields:
+    //   - customerName: string (required)
+    //   - address: string (required)
+    //   - phone: string (optional)
+    //   - acModel: string (optional)
+    //   - jobType: string (required, enum: Installation, Service, Repair, Maintenance)
+    //   - date: string (required, YYYY-MM-DD)
+    //   - notes: string (optional)
+    //   - engineerId: string (required, immutable)
+    //   - createdAt: timestamp (required)
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidJob(data) {
+      return data.customerName is string && data.customerName.size() > 0 && data.customerName.size() < 200 &&
+             data.address is string && data.address.size() > 0 && data.address.size() < 500 &&
+             (!('phone' in data) || (data.phone is string && data.phone.size() < 20)) &&
+             (!('acModel' in data) || (data.acModel is string && data.acModel.size() < 100)) &&
+             data.jobType in ['Installation', 'Service', 'Repair', 'Maintenance'] &&
+             data.date is string && data.date.matches('^\\d{4}-\\d{2}-\\d{2}$') &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() < 2000)) &&
+             data.engineerId == request.auth.uid;
+    }
+
+    match /jobs/{jobId} {
+      allow read: if isAuthenticated() && resource.data.engineerId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidJob(request.resource.data);
+      allow update: if isAuthenticated() && isOwner(resource.data.engineerId) && 
+                      isValidJob(request.resource.data) &&
+                      request.resource.data.engineerId == resource.data.engineerId;
+      allow delete: if isAuthenticated() && isOwner(resource.data.engineerId);
+    }
+  }
+}

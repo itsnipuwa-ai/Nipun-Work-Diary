@@ -1,0 +1,20 @@
+{
+  "short_name": "NipunDiary",
+  "name": "Nipun's Work Diary",
+  "icons": [
+    {
+      "src": "https://picsum.photos/seed/ac-unit/192/192",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://picsum.photos/seed/ac-unit/512/512",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1C1917",
+  "background_color": "#F5F5F4"
+}
