@@ -3,7 +3,7 @@ name: Build APK
 on:
   push:
     branches:
-      - main  # Change this if you want another branch
+      - main
 
 jobs:
   build:
@@ -11,39 +11,47 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repository
+      # Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Setup Node.js
+      # Setup Node
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'  # Match your local Node version
+          node-version: '20'
 
-      # Step 3: Install dependencies (fix native binding issues)
+      # Ensure src/main.tsx exists
+      - name: Check main.tsx
+        run: |
+          if [ ! -f "./src/main.tsx" ]; then
+            echo "Error: ./src/main.tsx not found!"
+            exit 1
+          fi
+
+      # Install dependencies safely
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
-      # Step 4: Build web app
+      # Build web app
       - name: Build project
         run: npm run build
 
-      # Step 5: Install Capacitor CLI (if using Capacitor)
+      # Install Capacitor CLI
       - name: Install Capacitor CLI
         run: npm install -g @capacitor/cli
 
-      # Step 6: Copy web assets into Android project
+      # Copy web assets to Android
       - name: Copy web assets to Android
         run: npx cap copy android
 
-      # Step 7: Build Android APK (debug)
+      # Build Android APK
       - name: Build Android APK
         run: |
           cd android
           ./gradlew assembleDebug
 
-      # Step 8: Upload APK artifact
+      # Upload APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
