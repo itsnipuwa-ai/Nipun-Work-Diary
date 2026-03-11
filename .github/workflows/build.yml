@@ -17,11 +17,16 @@ jobs:
         with:
           node-version: 18
 
-      - name: Clean install dependencies
+      - name: Clean old dependencies
         run: |
           rm -rf node_modules
           rm -f package-lock.json
-          npm install
+
+      - name: Install dependencies
+        run: npm install --include=optional
+
+      - name: Rebuild native modules
+        run: npm rebuild
 
       - name: Build web app
         run: npm run build
