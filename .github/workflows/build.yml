@@ -1,59 +1,47 @@
-name: Build APK
+name: Build Android APK
 
 on:
   push:
-    branches:
-      - main  # Change if you want another branch
+    branches: [ main ]
 
 jobs:
   build:
-    name: Build Android APK
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repository
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # Step 2: Setup Node.js
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 18
 
-      # Step 3: Ensure src/main.tsx exists
-      - name: Check main.tsx file
+      - name: Clean install dependencies
         run: |
-          if [ ! -f "./src/main.tsx" ]; then
-            echo "Error: ./src/main.tsx not found! Make sure the path matches exactly."
-            exit 1
-          fi
+          rm -rf node_modules
+          rm -f package-lock.json
+          npm install
 
-      # Step 4: Install dependencies safely
-      - name: Install dependencies
-        run: npm ci --legacy-peer-deps
-
-      # Step 5: Build web app
-      - name: Build project
+      - name: Build web app
         run: npm run build
 
-      # Step 6: Install Capacitor CLI
-      - name: Install Capacitor CLI
-        run: npm install -g @capacitor/cli
+      - name: Install Capacitor
+        run: |
+          npm install @capacitor/core @capacitor/cli
+          npm install @capacitor/android
+          npx cap init WorkDiary com.nipun.workdiary --web-dir=dist
+          npx cap add android
+          npx cap sync
 
-      # Step 7: Copy web assets to Android
-      - name: Copy web assets to Android
-        run: npx cap copy android
-
-      # Step 8: Build Android APK (debug)
-      - name: Build Android APK
+      - name: Build APK
         run: |
           cd android
+          chmod +x gradlew
           ./gradlew assembleDebug
 
-      # Step 9: Upload APK artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug.apk
+          name: work-diary-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
